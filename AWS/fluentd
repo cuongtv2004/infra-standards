@@ -1,0 +1,36 @@
+<source>
+  @type tail
+  format apache
+  path  /var/log/apache2/access.log
+  pos_file /var/log/td-agent/httpd.access.pos
+  tag tuan.httpd.access
+</source>
+
+<source>
+  @type tail
+  format apache
+  path  /var/log/apache2/error.log
+  pos_file /var/log/td-agent/httpd.error.pos
+  tag tuan.httpd.error
+</source>
+
+
+<match tuan.httpd.access>
+  type s3
+  path logs/apache #(optional; default="")
+  s3_bucket lab-architect-s3-hung-fluentd #(required)
+  s3_region us-east-1
+
+# tách file log theo giờ
+  time_slice_format %Y%m%d%H
+
+# thời gian push log
+  time_slice_wait 10m
+
+# file buffer
+  buffer_path /var/log/td-agent/buffer/s3
+  auto_create_bucket false #(optional; default=true)
+
+# output file format with hostname
+  s3_object_key_format "%{path}/#{Socket.gethostname}/%{time_slice}-events_%{index}.%{file_extension}"
+</match>
