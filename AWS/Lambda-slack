@@ -35,7 +35,7 @@ aws cloudwatch put-metric-alarm --region eu-central-1
 - Under trigger, select the SNS-topic you created in the previous step
 - Under trigger, check “Enable trigger”
 - Fill environment variables => Create function
-- Edit funtion and Edit code inline in file index.js
+- Edit funtion and Edit code inline in file index_slack.js
 - Choose Node 4.3
 - VPC: no VPC
 
