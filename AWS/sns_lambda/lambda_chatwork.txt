@@ -1,0 +1,42 @@
+1. Create bot in chatwork. Copy api (token) and room ID for push message
+
+2. Create SNS topic
+aws sns create-topic 
+    --region eu-central-1
+    --name <my-topic-sns-name>
+
+3. Create Alarm in CloudWatch with action "Send notification to <my-topic-sns-name>"
+VD:
+aws cloudwatch put-metric-alarm --region eu-central-1 
+    --alarm-name "ELB_500" 
+    --alarm-description "Sends 500-errors to Slack" 
+    --actions-enabled 
+    --alarm-actions "my-topic-sns-name" 
+    --metric-name "HTTPCode_Backend_5XX" 
+    --namespace AWS/ELB --statistic "Sum" 
+    --dimensions "Name=LoadBalancerName,Value=your-elb-name" 
+    --period 60 
+    --evaluation-periods 60 
+    --threshold 1 
+    --comparison-operator "GreaterThanOrEqualToThreshold"
+
+4. Create Lambda function (require: have permission create IAM role)
+- From Author from scratch type Name
+- Runtime with Node.js 6.10
+- Role: Select Existing role or Create role if not exist 
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "arn:aws:logs:*:*:*"
+        }
+    ]
+}
+
+- Edit code inline with file index_chatwork.js

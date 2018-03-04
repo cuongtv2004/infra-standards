@@ -31,7 +31,7 @@ aws cloudwatch put-metric-alarm --region eu-central-1
 5. Create Lambda function (require: have permission create IAM role)
 - Under blueprint, search and select cloudwatch-alarm-to-slack
 - Under Basic information, type name <your-lambda-function>, select Create a custom role => Allow
-- Slect Existing role above
+- Select Existing role above
 - Under trigger, select the SNS-topic you created in the previous step
 - Under trigger, check “Enable trigger”
 - Fill environment variables => Create function
