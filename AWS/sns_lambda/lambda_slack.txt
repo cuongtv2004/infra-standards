@@ -1,0 +1,49 @@
+1. Install webhook in slack
+- Visit the Incoming WebHooks page in the Slack App Directory. https://my.slack.com/apps/A0F7XDUAZ-incoming-webhooks
+- Click Add Configuration.
+- Choose the channel your Incoming WebHook will post messages to.
+- Click Add Incoming WebHooks Integration.
+- If you’d like, you can customize your app by adding a descriptive label, name or icon.
+- Click Save Settings to finish.
+
+2. Copy Webhook URL
+
+3. Create SNS topic
+aws sns create-topic 
+    --region eu-central-1
+    --name <my-topic-sns-name>
+    
+4. Create Alarm in CloudWatch with action "Send notification to <my-topic-sns-name>"
+VD:
+aws cloudwatch put-metric-alarm --region eu-central-1 
+    --alarm-name "ELB_500" 
+    --alarm-description "Sends 500-errors to Slack" 
+    --actions-enabled 
+    --alarm-actions "my-topic-sns-name" 
+    --metric-name "HTTPCode_Backend_5XX" 
+    --namespace AWS/ELB --statistic "Sum" 
+    --dimensions "Name=LoadBalancerName,Value=your-elb-name" 
+    --period 60 
+    --evaluation-periods 60 
+    --threshold 1 
+    --comparison-operator "GreaterThanOrEqualToThreshold"
+
+5. Create Lambda function (require: have permission create IAM role)
+- Under blueprint, search and select cloudwatch-alarm-to-slack
+- Under Basic information, type name <your-lambda-function>, select Create a custom role => Allow
+- Select Existing role above
+- Under trigger, select the SNS-topic you created in the previous step
+- Under trigger, check “Enable trigger”
+- Fill environment variables => Create function
+- Edit funtion and Edit code inline in file index_slack.js
+- Choose Node 4.3
+- VPC: no VPC
+
+=> test: 
+aws sns publish
+    --topic-arn "arn:aws:sns:eu-central-1:3...:my-topic-snsname"
+    --message "Test message"
+    --region=eu-central-1
+    
+
+
