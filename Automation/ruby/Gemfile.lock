@@ -6,7 +6,7 @@ GIT
     redis-actionpack (5.0.0)
       actionpack (>= 4.0.0, < 6)
       redis-rack (~> 2.0.0.pre)
-      redis-store (~> 1.2.0.pre)
+      redis-store (~> 1.4.0)
 
 GIT
   remote: git://github.com/redis-store/redis-rack.git
@@ -25,7 +25,7 @@ GIT
     redis-rails (5.0.1)
       redis-actionpack (~> 5.0.0)
       redis-activesupport (~> 5.0.0)
-      redis-store (~> 1.2.0)
+      redis-store (~> 1.4.0)
 
 GIT
   remote: git://github.com/rubysherpas/paranoia.git
@@ -434,10 +434,10 @@ GEM
     redis (3.3.1)
     redis-activesupport (5.0.1)
       activesupport (>= 3, < 6)
-      redis-store (~> 1.2.0)
+      redis-store (~> 1.4.0)
     redis-namespace (1.5.2)
       redis (~> 3.0, >= 3.0.4)
-    redis-store (1.2.0)
+    redis-store (~> 1.4.0)
       redis (>= 2.2)
     responders (2.3.0)
       railties (>= 4.2.0, < 5.1)
@@ -592,7 +592,7 @@ DEPENDENCIES
   kaminari
   listen (~> 3.0.5)
   mysql2 (>= 0.3.18, < 0.5)
-  nokogiri (~> 1.6.8)
+  nokogiri (~> 1.8.1)
   paranoia!
   passenger (>= 5.0.25)
   pry
@@ -605,7 +605,7 @@ DEPENDENCIES
   rspec
   rspec-collection_matchers
   rspec-rails
-  rubocop (~> 0.35.0)
+  rubocop ~> (0.49.0)
   rubocop-checkstyle_formatter
   sass-rails (~> 5.0)
   shoulda-matchers
