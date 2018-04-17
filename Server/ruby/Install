@@ -40,7 +40,7 @@ npm -g install npm
 sudo apt-get install mysql-server mysql-client libmysqlclient-dev
 
 #Install Redis
-apt-get install redis-server redis-tool
+apt-get install redis-server redis-tools
 
 #Install nginx
 apt-get install nginx
