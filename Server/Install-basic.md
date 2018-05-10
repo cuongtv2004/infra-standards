@@ -101,7 +101,9 @@ vim /etc/bash.bashrc
 -----------------------------
 export HISTTIMEFORMAT='%F %T  '
 export PROMPT_COMMAND='RETRN_VAL=$?;logger -p local2.info "$(whoami)[$PWD][$SSH_CONNECTION] [$$]: $(history 1 | sed "s/^[ ]*[0-9]\+[ ]*//" ) [$RETRN_VAL]"'
-/etc/init.d/rsyslog restart
+----------------------------
+
+sudo /etc/init.d/rsyslog restart
 ```
 
 # Centos
@@ -213,5 +215,7 @@ vim /etc/bashrc
 -----------------------------
 export HISTTIMEFORMAT='%F %T  '
 export PROMPT_COMMAND='RETRN_VAL=$?;logger -p local2.info "$(whoami)[$PWD][$SSH_CONNECTION] [$$]: $(history 1 | sed "s/^[ ]*[0-9]\+[ ]*//" ) [$RETRN_VAL]"'
-/etc/init.d/rsyslog restart
+----------------------------
+
+sudo /etc/init.d/rsyslog restart
 ```
