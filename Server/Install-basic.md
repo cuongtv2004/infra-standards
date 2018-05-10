@@ -1,4 +1,4 @@
-#Ubuntu
+# Ubuntu
 ## Add group admin
 ```
 sudo groupadd admin
@@ -57,14 +57,14 @@ deploy hard nofile 65536
 ```
 Set user open max process
 ```
-vi /etc/security/limits.d/90-nproc.conf
+vim /etc/security/limits.d/90-nproc.conf
 ```
 add line
 ```
-	deploy soft nproc 65535
-	deploy hard nproc 65535
-	deploy soft nofile 65535
-  deploy hard nofile 65535
+deploy soft nproc 65535
+deploy hard nproc 65535
+deploy soft nofile 65535
+deploy hard nofile 65535
 ```
 ### REBOOT SERVER TO MAKE ALL CONFIG RUNNING WELL
 
@@ -73,7 +73,7 @@ Check port open
 ```
 iptables -L
 ```
-###If you are use staging, AWS, Azure or another cloud serivce you can disable it
+### If you are use staging, AWS, Azure or another cloud serivce you can disable it
 ```
 /etc/init.d/ufw stop
 chkconfig ufw off
@@ -89,7 +89,22 @@ Save this config
 service iptables save
 ```
 
-#Centos
+### Create log for user command
+```
+sudo vim /etc/rsyslog.conf
+-----------------------------
+....
+local2.info                                             /var/log/usercommand
+-----------------------------
+
+vim /etc/bash.bashrc
+-----------------------------
+export HISTTIMEFORMAT='%F %T  '
+export PROMPT_COMMAND='RETRN_VAL=$?;logger -p local2.info "$(whoami)[$PWD][$SSH_CONNECTION] [$$]: $(history 1 | sed "s/^[ ]*[0-9]\+[ ]*//" ) [$RETRN_VAL]"'
+/etc/init.d/rsyslog restart
+```
+
+# Centos
 ## Add user and group deploy
 sudo useradd -m -d /home/deploy deploy  -s /bin/bash -G wheel
 ##If you don't want to add user deploy group wheel, you can config file sudoer (Staging is ok not in production)
@@ -152,10 +167,10 @@ vi /etc/security/limits.d/90-nproc.conf
 ```
 add line
 ```
-	deploy soft nproc 65535
-	deploy hard nproc 65535
-	deploy soft nofile 65535
-  deploy hard nofile 65535
+deploy soft nproc 65535
+deploy hard nproc 65535
+deploy soft nofile 65535
+deploy hard nofile 65535
 ```
 ### REBOOT SERVER TO MAKE ALL CONFIG RUNNING WELL
 
@@ -184,4 +199,19 @@ iptables -I INPUT 5 -i eth0 -p tcp --dport 443 -m state --state NEW,ESTABLISHED 
 Save this config
 ```
 service iptables save
+```
+
+### Create log for user command
+```
+sudo vim /etc/rsyslog.conf
+-----------------------------
+....
+local2.info                                             /var/log/usercommand
+-----------------------------
+
+vim /etc/bash.bashrc
+-----------------------------
+export HISTTIMEFORMAT='%F %T  '
+export PROMPT_COMMAND='RETRN_VAL=$?;logger -p local2.info "$(whoami)[$PWD][$SSH_CONNECTION] [$$]: $(history 1 | sed "s/^[ ]*[0-9]\+[ ]*//" ) [$RETRN_VAL]"'
+/etc/init.d/rsyslog restart
 ```
