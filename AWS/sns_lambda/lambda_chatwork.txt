@@ -40,3 +40,11 @@ aws cloudwatch put-metric-alarm --region eu-central-1
 }
 
 - Edit code inline with file index_chatwork.js
+
+5. If doesn't have zip folder node, create folder in a server:
+- $ mkdir node
+- $ cd node && vim index.js (data in https://github.com/cuongtv2004/infra-standards/blob/master/AWS/sns_lambda/index_chatwork.js)
+- $ npm init --test
+- $ npm install request --save
+- $ zip node.zip node/*
+- upload node.zip to lambda
