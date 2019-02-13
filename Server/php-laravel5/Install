@@ -1,4 +1,6 @@
+##### Ubuntu 16.04 #####
 DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get install -y locales
 locale-gen en_US.UTF-8
 
 # Environment variables
@@ -18,16 +20,22 @@ echo "mysql-server mysql-server/root_password password root" | debconf-set-selec
     && echo "mysql-server mysql-server/root_password_again password root" | debconf-set-selections \
     && apt-get install -y mysql-server
 
+# Start mysql
+service mysql start
+
 # Install Redis, Nginx, Mongo
+apt-get install build-essential tcl
 apt-get -y --force-yes install nginx redis-server mongodb supervisor \
     && mkdir -p /data/db
 
+# Start redis
+service redis-server start
+
 # Add the "PHP 7" ppa
-add-apt-repository -y \
-    ppa:ondrej/php
+apt-get install -y python-software-properties && add-apt-repository -y ppa:ondrej/php
 
 # Install PHP-CLI 7, some PHP extentions and some useful Tools with APT
-RUN apt-get update && apt-get install -y --force-yes \
+apt-get update && apt-get install -y --force-yes \
     php7.1-cli \
     php7.1-common \
     php7.1-curl \
@@ -58,7 +66,8 @@ RUN apt-get update && apt-get install -y --force-yes \
     nano \
     net-tools \
     pkg-config \
-    iputils-ping
+    iputils-ping \
+    php-redis
 
 # remove load xdebug extension (only load on phpunit command)
 sed -i 's/^/;/g' /etc/php/7.1/cli/conf.d/20-xdebug.ini
@@ -69,18 +78,87 @@ echo "export PATH=${PATH}:/var/www/html/vendor/bin:/root/.composer/vendor/bin" >
 # Load xdebug Zend extension with phpunit command
 echo "alias phpunit='php -dzend_extension=xdebug.so /var/www/laravel/vendor/bin/phpunit'" >> ~/.bashrc
 
-# Install mongodb extension
-pecl channel-update pecl.php.net && pecl install mongodb-1.1.9
-echo "extension=mongodb.so" >> /etc/php/7.1/cli/php.ini
+## Install mongodb extension
+# pecl channel-update pecl.php.net && pecl install mongodb-1.1.9
+# echo "extension=mongodb.so" >> /etc/php/7.1/cli/php.ini
 
 # Install Nodejs
-curl -sL https://deb.nodesource.com/setup_7.x | bash - \
+curl -sL https://deb.nodesource.com/setup_10.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g gulp-cli bower eslint babel-eslint eslint-plugin-react yarn
 
-# Install SASS
-apt-get install -y ruby \
-    && gem install sass
+# Config nginx
+cp default.conf /etc/nginx/sites-available/default
+sudo service nginx restart
 
-# COPY default.conf /etc/nginx/sites-available/default
+## Install SASS
+#apt-get install -y ruby \
+#    && gem install sass
+
 # COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+##### CentOS 6 #####
+localedef -v -c -i en_US -f UTF-8 en_US.UTF-8
+
+# Environment variables
+echo "export LANGUAGE=en_US.UTF-8" >> ~/.bashrc \
+    && echo "export LC_ALL=en_US.UTF-8" >> ~/.bashrc \
+    && echo "export LC_CTYPE=UTF-8" >> ~/.bashrc \
+    && echo "export LANG=en_US.UTF-8" >> ~/.bashrc \
+    && echo "export TERM=xterm" >> ~/.bashrc \
+    && source ~/.bashrc
+
+# Enable repel for php 7.1
+yum install https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+yum install http://rpms.remirepo.net/enterprise/remi-release-6.rpm
+yum install yum-utils
+yum-config-manager --enable remi-php71
+
+# Install php
+yum install php php-mcrypt php-cli php-gd php-curl php-mysql php-ldap php-zip php-fileinfo 
+
+# Add bin folder of composer to PATH.
+echo "export PATH=${PATH}:/var/www/html/vendor/bin:/root/.composer/vendor/bin" >> ~/.bashrc
+
+# Load xdebug Zend extension with phpunit command
+echo "alias phpunit='php -dzend_extension=xdebug.so /var/www/laravel/vendor/bin/phpunit'" >> ~/.bashrc
+
+# Install nodejs
+yum install -y gcc-c++ make
+curl -sL https://rpm.nodesource.com/setup_10.x | bash -
+yum install -y nodejs
+npm install -g gulp-cli bower eslint babel-eslint eslint-plugin-react yarn
+
+# Install mysql
+sudo yum install -y wget
+wget http://dev.mysql.com/get/mysql57-community-release-el6-7.noarch.rpm
+sudo rpm -ivh mysql57-community-release-el6-7.noarch.rpm
+sudo yum install -y mysql-server mysql-client
+
+
+# Start mysql
+sudo service mysqld start
+
+# Change password for root mysql
+grep -i temporary /var/log/mysqld.log
+mysql -uroot -p
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('Yourpassword1!');
+sudo service mysqld restart
+sudo chkconfig mysqld on
+
+#Install Redis
+sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+sudo yum install -y redis
+
+# Start redis
+sudo service redis start
+sudo chkconfig redis on
+
+# Install nginx
+sudo yum install -y nginx
+sudo chkconfig nginx on
+
+# Config nginx
+cp default.conf /etc/nginx/sites-available/default
+sudo service nginx restart
+

@@ -1,4 +1,4 @@
-# Ubuntu 14.04
+######### Ubuntu 16.04 #########
 # Install Ruby with RVM
 
 # Create user deploy for install
@@ -10,66 +10,88 @@ su - deploy
 sudo apt-get update
 
 # Install dependencies
-sudo apt-get install git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev python-software-properties libffi-dev nodejs
+curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+sudo apt-get update
+sudo apt-get install -y git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev software-properties-common libffi-dev nodejs yarn
 
-# Add key
-sudo apt-get install libgdbm-dev libncurses5-dev automake libtool bison libffi-dev
-gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+
+# Install ruby with RVM
+sudo apt-get install -y libgdbm-dev libncurses5-dev automake libtool bison libffi-dev
+gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
 curl -sSL https://get.rvm.io | bash -s stable
 source ~/.rvm/scripts/rvm
-rvm requirements
+rvm install 2.5.3
+rvm use 2.5.3 --default
+ruby -v
 
-# Install ruby
-rvm install <version>
-rvm use <version> --default
+# Install bundler
+gem install bundler
 
 # Install Rails
-gem install rails -v <version>
-
-# Install bundle
-gem install bundle
-
-# Install nodejs
-curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
 sudo apt-get install -y nodejs
+gem install rails -v 5.0.7.1
+rails -v
 
 # Install npm
 npm -g install npm
 
 #Install mysql
-sudo apt-get install mysql-server mysql-client libmysqlclient-dev
+echo "mysql-server mysql-server/root_password password root" | sudo debconf-set-selections \
+    && echo "mysql-server mysql-server/root_password_again password root" | sudo debconf-set-selections \
+    && sudo apt-get install -y mysql-server mysql-client libmysqlclient-dev
+
+# Start mysql
+sudo service mysql start
 
 #Install Redis
-apt-get install redis-server redis-tool
+sudo apt-get install redis-server
 
-#Install nginx
-apt-get install nginx
+# Start redis
+sudo service redis-server start
+
+# Install nginx
+sudo apt-get install nginx
+
+# Copy file config nginx
+sudo rm -rf /etc/nginx/sites-enabled/*
+cp default.conf /etc/nginx/conf.d/
+
+# Restart nginx
+sudo service nginx restart
+
 
 # Deploy service
 ## Create folder rails_apps
-mkdir -p /usr/local/rails_apps/<Project name>
+sudo mkdir -p /usr/local/rails_apps/<Project name>
+sudo chown -R deploy:deploy /usr/local/rails_apps/
+
 ## Clone code from source
 git clone <URL>
+
 ## Setup ENV
-	vim /home/deploy/.env
-		export RAILS_ENV=
-		export DEPLOY_BRANCH=
-		export DEVISE_SECRET_KEY=
-		export SECRET_KEY_BASE=
-		export DATABASE_NAME=
-		export DATABASE_HOSTNAME=
-		export DATABASE_USERNAME=
-		export DATABASE_PASSWORD=
-		export REDIS_HOSTNAME=
-		export EMAIL_USERNAME=
-		export EMAIL_PASSWORD=
-		export HOST=
-		export S3_KEY=
-		export S3_SECRET=
-		export S3_BUCKET_NAME=
-		export S3_REGION=
+vim /home/deploy/.env
+	export RAILS_ENV=
+	export DEPLOY_BRANCH=
+	export DEVISE_SECRET_KEY=
+	export SECRET_KEY_BASE=
+	export DATABASE_NAME=
+	export DATABASE_HOSTNAME=
+	export DATABASE_USERNAME=
+	export DATABASE_PASSWORD=
+	export REDIS_HOSTNAME=
+	export EMAIL_USERNAME=
+	export EMAIL_PASSWORD=
+	export HOST=
+	export S3_KEY=
+	export S3_SECRET=
+	export S3_BUCKET_NAME=
+	export S3_REGION=
+
 ## Load ENV
   source ~/.env
+
 ## ENV autoload
   vim ~/.profile
 ##Add this command
@@ -79,9 +101,83 @@ git clone <URL>
 ```
 Follow: https://github.com/framgia/infra-standards/tree/master/Server/ruby/unicorn
 ```
-##Deploy Automation via capistrano + Framgia CI
+## Deploy Automation via capistrano + Framgia CI
 ```
 Follow this guide:https://github.com/framgia/rails5_skeleton
 Or
 https://github.com/framgia/infra-standards/tree/master/Automation/ruby
 ```
+
+######### CentOS 6 #########
+# Create user deploy for install
+# check group wheel. if not exits, create group
+useradd -d /home/deploy -s /bin/bash -m deploy -G wheel
+su - deploy
+
+# update repo
+sudo yum update -y
+
+# Install curl 
+sudo yum install curl
+
+# Install rvm
+gpg2 --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+curl -L get.rvm.io | bash -s stable
+source /home/deploy/.rvm/scripts/rvm
+rvm requirements
+rvmsudo yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel
+
+# Install ruby
+rvm install 2.5.3
+rvm use 2.5.3 --default
+ruby -v
+
+# Install bundler
+gem install bundler
+
+# Install Rails
+gem install rails -v 5.0.7.1
+rails -v
+
+# Install Nodejs
+curl -sL https://rpm.nodesource.com/setup_10.x | sudo -E bash -
+sudo yum install -y nodejs
+
+# Install npm
+npm -g install npm
+
+# Install mysql
+sudo yum install -y wget
+wget http://dev.mysql.com/get/mysql57-community-release-el6-7.noarch.rpm
+sudo rpm -ivh mysql57-community-release-el6-7.noarch.rpm
+sudo yum install -y mysql-server mysql-client
+
+
+# Start mysql
+sudo service mysqld start
+
+# Change password for root mysql
+grep -i temporary /var/log/mysqld.log
+mysql -uroot -p
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('Yourpassword1!');
+sudo service mysqld restart
+sudo chkconfig mysqld on
+
+#Install Redis
+sudo rpm -Uvh http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+sudo yum install -y redis
+
+# Start redis
+sudo service redis start
+sudo chkconfig redis on
+
+# Install nginx
+sudo yum install -y nginx
+sudo chkconfig nginx on
+
+# Copy file config nginx
+sudo rm -rf /etc/nginx/sites-enabled/*
+cp default.conf /etc/nginx/conf.d/
+
+# Restart nginx
+sudo service nginx restart

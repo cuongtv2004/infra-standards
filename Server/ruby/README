@@ -1,1 +1,11 @@
-Guide to setup ruby server
+# Guide to setup ruby server
+
+This guide contains:
+- Ubuntu server 16.04 or CentOS 6
+- Ruby 2.5.3 with RVM
+- Rails 5.0
+- Nodejs 8
+- NPM
+- Mysql 5.7
+- Nginx
+- Redis
