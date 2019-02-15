@@ -57,10 +57,50 @@ sudo apt-get install nginx
 # Copy file config nginx
 sudo rm -rf /etc/nginx/sites-enabled/*
 cp default.conf /etc/nginx/conf.d/
+sudo sed -i 's/user\ =\ nginx/user\ =\ deploy/g' /etc/nginx/nginx.conf
 
 # Restart nginx
 sudo service nginx restart
 
+# Install logrotate
+sudo apt-get install logrotate
+
+# Config logrotate
+vim /etc/logrotate.d/rails
+-------------------------------
+/usr/local/rails_apps/{Project Name}/shared/log/*.log {
+  daily
+  missingok
+  rotate 30
+  compress
+  delaycompress
+  notifempty
+  copytruncate
+}
+-------------------------------
+
+vim /etc/logrotate.d/nginx
+-------------------------------
+/var/log/nginx/*.log {
+        daily
+        missingok
+        rotate 14
+        dateext
+        compress
+        delaycompress
+        notifempty
+        create 0640 deploy deploy
+        sharedscripts
+        prerotate
+                if [ -d /etc/logrotate.d/httpd-prerotate ]; then \
+                        run-parts /etc/logrotate.d/httpd-prerotate; \
+                fi \
+        endscript
+        postrotate
+                invoke-rc.d nginx rotate >/dev/null 2>&1
+        endscript
+}
+-------------------------------
 
 # Deploy service
 ## Create folder rails_apps
@@ -178,6 +218,44 @@ sudo chkconfig nginx on
 # Copy file config nginx
 sudo rm -rf /etc/nginx/sites-enabled/*
 cp default.conf /etc/nginx/conf.d/
+sudo sed -i 's/user\ =\ nginx/user\ =\ deploy/g' /etc/nginx/nginx.conf
 
 # Restart nginx
 sudo service nginx restart
+
+# Install logrotate
+sudo yum install logrotate
+
+# Config logrotate
+vim /etc/logrotate.d/rails
+-------------------------------
+/usr/local/rails_apps/{Project Name}/shared/log/*.log {
+  daily
+  missingok
+  rotate 30
+  compress
+  delaycompress
+  notifempty
+  copytruncate
+}
+-------------------------------
+
+
+vim /etc/logrotate.d/nginx
+----------------------------
+/var/log/nginx/*.log {
+        daily
+        missingok
+	dateext 
+        rotate 30
+        compress
+        delaycompress
+        notifempty
+        create 640 deploy deploy
+        sharedscripts
+        postrotate
+                [ -f /var/run/nginx.pid ] && kill -USR1 `cat /var/run/nginx.pid`
+        endscript
+}
+----------------------------
+

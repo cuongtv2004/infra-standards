@@ -106,6 +106,12 @@ export PROMPT_COMMAND='RETRN_VAL=$?;logger -p local2.info "$(whoami)[$PWD][$SSH_
 sudo /etc/init.d/rsyslog restart
 ```
 
+### Add time for history bash
+su - deploy
+echo 'export HISTTIMEFORMAT="%d/%m/%y %T "' >> ~/.bashrc
+source ~/.bashrc
+
+
 # Centos
 ## Add user and group deploy
 sudo useradd -m -d /home/deploy deploy  -s /bin/bash -G wheel
@@ -219,3 +225,8 @@ export PROMPT_COMMAND='RETRN_VAL=$?;logger -p local2.info "$(whoami)[$PWD][$SSH_
 
 sudo /etc/init.d/rsyslog restart
 ```
+
+### Add time for history bash
+su - deploy
+echo 'export HISTTIMEFORMAT="%d/%m/%y %T "' >> ~/.bashrc
+source ~/.bashrc
