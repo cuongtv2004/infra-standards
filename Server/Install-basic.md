@@ -13,7 +13,7 @@ sudo vim /etc/sudoer
 ```
 Add this
 ```
-deploy  ALL=(ALL)
+deploy  ALL=(ALL) ALL
 ```
 if you don't want to type password. you can add this
 ```
