@@ -52,8 +52,8 @@ vim  /etc/security/limits.conf
 ```
 Add this
 ```
-deploy soft nofile 65536
-deploy hard nofile 65536
+* soft nofile 65536
+* hard nofile 65536
 ```
 Set user open max process
 ```
@@ -61,10 +61,10 @@ vim /etc/security/limits.d/90-nproc.conf
 ```
 add line
 ```
-deploy soft nproc 65535
-deploy hard nproc 65535
-deploy soft nofile 65535
-deploy hard nofile 65535
+* soft nproc 65535
+* hard nproc 65535
+* soft nofile 65535
+* hard nofile 65535
 ```
 ### REBOOT SERVER TO MAKE ALL CONFIG RUNNING WELL
 
@@ -166,8 +166,8 @@ vim  /etc/security/limits.conf
 ```
 Add this
 ```
-deploy soft nofile 65536
-deploy hard nofile 65536
+* soft nofile 65536
+* hard nofile 65536
 ```
 Set user open max process
 ```
@@ -175,10 +175,10 @@ vi /etc/security/limits.d/90-nproc.conf
 ```
 add line
 ```
-deploy soft nproc 65535
-deploy hard nproc 65535
-deploy soft nofile 65535
-deploy hard nofile 65535
+* soft nproc 65535
+* hard nproc 65535
+* soft nofile 65535
+* hard nofile 65535
 ```
 ### REBOOT SERVER TO MAKE ALL CONFIG RUNNING WELL
 
