@@ -135,7 +135,7 @@ vim /etc/logrotate.d/nginx
 }
 -------------------------------
 
-# COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 
 ##### CentOS 6 #####
 localedef -v -c -i en_US -f UTF-8 en_US.UTF-8
@@ -183,6 +183,7 @@ sudo service mysqld start
 grep -i temporary /var/log/mysqld.log
 mysql -uroot -p
 SET PASSWORD FOR 'root'@'localhost' = PASSWORD('Yourpassword1!');
+flush privileges;
 sudo service mysqld restart
 sudo chkconfig mysqld on
 
@@ -200,6 +201,7 @@ sudo chkconfig nginx on
 
 sed -i 's/user\ =\ apache/user\ =\ nginx/g' www.conf
 sed -i 's/group\ =\ apache/group\ =\ nginx/g' www.conf
+sudo chkconfig php-fpm on
 sudo service php-fpm restart
 
 # Config nginx
@@ -236,7 +238,7 @@ vim /etc/logrotate.d/nginx
         compress
         delaycompress
         notifempty
-        create 640 deploy deploy
+        create 640 nginx nginx
         sharedscripts
         postrotate
                 [ -f /var/run/nginx.pid ] && kill -USR1 `cat /var/run/nginx.pid`
@@ -244,3 +246,109 @@ vim /etc/logrotate.d/nginx
 }
 ----------------------------
 
+
+##### CentOS 7 #####
+localedef -v -c -i en_US -f UTF-8 en_US.UTF-8
+
+# Environment variables
+echo "export LANGUAGE=en_US.UTF-8" >> ~/.bashrc \
+    && echo "export LC_ALL=en_US.UTF-8" >> ~/.bashrc \
+    && echo "export LC_CTYPE=UTF-8" >> ~/.bashrc \
+    && echo "export LANG=en_US.UTF-8" >> ~/.bashrc \
+    && echo "export TERM=xterm" >> ~/.bashrc \
+    && source ~/.bashrc
+
+# Enable repel for php 7.1
+yum install epel-release yum-utils -y
+yum-config-manager --enable remi-php71
+
+# Install php
+yum install -y php php-mcrypt php-cli php-gd php-curl php-mysql php-ldap php-zip php-fileinfo php-fpm
+
+# Add bin folder of composer to PATH.
+echo "export PATH=${PATH}:/var/www/html/vendor/bin:/root/.composer/vendor/bin" >> ~/.bashrc
+
+# Load xdebug Zend extension with phpunit command
+echo "alias phpunit='php -dzend_extension=xdebug.so /var/www/laravel/vendor/bin/phpunit'" >> ~/.bashrc
+
+# Install nodejs
+yum install -y gcc-c++ make
+curl -sL https://rpm.nodesource.com/setup_10.x | bash -
+yum install -y nodejs
+npm install -g gulp-cli bower eslint babel-eslint eslint-plugin-react yarn
+
+# Install mysql
+sudo yum localinstall https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm
+sudo yum install -y mysql-community-server
+
+# Start mysql
+sudo systemctl start mysqld
+
+# Change password for root mysql
+grep -i temporary /var/log/mysqld.log
+mysql -uroot -p
+SET PASSWORD FOR 'root'@'localhost' = PASSWORD('Yourpassword1!');
+flush privileges;
+sudo systemctl restart mysqld
+sudo systemctl enable mysqld.service
+
+#Install Redis
+sudo yum install epel-release yum-utils
+sudo yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+sudo yum-config-manager --enable remi
+sudo yum install -y redis
+
+# Start redis
+sudo systemctl start redis
+sudo systemctl enable redis
+
+# Install nginx
+sudo yum install -y nginx
+sudo systemctl enable nginx
+
+sed -i 's/user\ =\ apache/user\ =\ nginx/g' /etc/php-fpm.d/www.conf
+sed -i 's/group\ =\ apache/group\ =\ nginx/g' /etc/php-fpm.d/www.conf
+systemctl enable php-fpm
+systemctl restart php-fpm
+
+# Config nginx
+cp default.conf /etc/nginx/sites-available/default
+sudo systemctl restart nginx
+
+# Install logrotate
+sudo yum install -y logrotate
+
+# Config logrotate
+vim /etc/logrotate.d/php-fpm
+----------------------------
+/var/log/php-fpm/*log {
+    daily
+    rotate 30
+    dateext
+    missingok
+    notifempty
+    sharedscripts
+    delaycompress
+    postrotate
+        /bin/kill -SIGUSR1 `cat /var/run/php-fpm/php-fpm.pid 2>/dev/null` 2>/dev/null || true
+    endscript
+}
+----------------------------
+
+vim /etc/logrotate.d/nginx
+----------------------------
+/var/log/nginx/*.log {
+        daily
+        missingok
+        dateext
+        rotate 30
+        compress
+        delaycompress
+        notifempty
+        create 640 nginx nginx
+        sharedscripts
+        postrotate
+                [ -f /var/run/nginx.pid ] && kill -USR1 `cat /var/run/nginx.pid`
+        endscript
+}
+----------------------------
